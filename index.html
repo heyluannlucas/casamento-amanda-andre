@@ -153,13 +153,62 @@
     gap:16px;
     align-items:center;
     position:relative;
-    transition:border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+    transition:border-color .25s ease, transform .25s ease, box-shadow .25s ease,
+               opacity .6s ease, translate .6s ease;
     cursor:pointer;
     text-align:left;
     width:100%;
     font-family:inherit;
     appearance:none;
     -webkit-appearance:none;
+    opacity:0;
+    translate:0 16px;
+  }
+  .prompt.in-view{
+    opacity:1;
+    translate:0 0;
+  }
+
+  /* ambient falling petals */
+  #petals{
+    position:fixed; inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:1;
+  }
+  .petal{
+    position:absolute;
+    top:-5vh;
+    width:12px; height:12px;
+    background:var(--rose);
+    border-radius:50% 0 50% 50%;
+    opacity:0.4;
+    animation-name:petalFall;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+  }
+  @keyframes petalFall{
+    0%{ transform:translateY(-5vh) translateX(0) rotate(0deg); }
+    100%{ transform:translateY(112vh) translateX(var(--drift, 40px)) rotate(340deg); }
+  }
+
+  /* confetti burst on send */
+  .confetti-piece{
+    position:fixed;
+    width:8px; height:8px;
+    border-radius:50% 0 50% 50%;
+    pointer-events:none;
+    z-index:70;
+    animation:confettiBurst .95s ease-out forwards;
+  }
+  @keyframes confettiBurst{
+    0%{ transform:translate(0,0) rotate(0deg); opacity:1; }
+    100%{ transform:translate(var(--cx), var(--cy)) rotate(var(--cr)); opacity:0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .petal{ display:none; }
+    .prompt{ opacity:1; translate:0 0; transition:none; }
   }
   .prompt:hover{ border-color:var(--rose); }
   .prompt:active{ transform:scale(0.99); }
@@ -192,6 +241,14 @@
     transition:opacity .3s ease;
   }
   .prompt.done .prompt-check{ opacity:1; }
+  .prompt-check path{
+    stroke-dasharray:26;
+    stroke-dashoffset:26;
+    transition:stroke-dashoffset .5s ease .15s;
+  }
+  .prompt.done .prompt-check path{
+    stroke-dashoffset:0;
+  }
 
   .cta-block{
     margin-top:40px;
@@ -290,17 +347,201 @@
     transform:translate(-50%, 0);
   }
   #toast.err{ background:#8B4A3F; }
+
+  /* ===== envelope intro ===== */
+  body.locked{ overflow:hidden; height:100%; }
+
+  .fade-up{ animation:none; }
+  body.revealed .fade-up{ animation:fadeUp .9s ease forwards; }
+
+  #envelopeIntro{
+    position:fixed; inset:0; z-index:60;
+    background:var(--ivory);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:opacity .7s ease, visibility .7s ease;
+  }
+  #envelopeIntro.hidden{
+    opacity:0; visibility:hidden; pointer-events:none;
+  }
+  .env-scene{
+    perspective:1400px;
+  }
+  .envelope{
+    position:relative;
+    width:300px; height:200px;
+  }
+  .env-shadow{
+    position:absolute;
+    left:10%; right:10%; bottom:-22px; height:18px;
+    background:radial-gradient(ellipse at center, rgba(58,51,46,0.25), transparent 70%);
+    filter:blur(2px);
+    transition:opacity 1s ease;
+  }
+  .env-back{
+    position:absolute; inset:0;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:3px;
+    box-shadow:0 18px 34px -18px rgba(58,51,46,0.35);
+  }
+  .env-side{
+    position:absolute; inset:0;
+    overflow:hidden;
+    border-radius:3px;
+    z-index:2;
+    pointer-events:none;
+  }
+  .env-side::before, .env-side::after{
+    content:"";
+    position:absolute;
+    bottom:0;
+    width:0; height:0;
+    border-style:solid;
+  }
+  .env-side::before{
+    left:0;
+    border-width:0 0 96px 150px;
+    border-color:transparent transparent var(--ivory-deep) transparent;
+    opacity:0.9;
+  }
+  .env-side::after{
+    right:0;
+    border-width:96px 0 0 150px;
+    border-color:transparent transparent transparent var(--ivory-deep);
+    opacity:0.9;
+  }
+  .env-letter{
+    position:absolute;
+    left:16px; right:16px; top:14px;
+    height:158px;
+    background:var(--ivory);
+    border:1px solid var(--line);
+    border-radius:2px;
+    z-index:1;
+    display:flex; align-items:center; justify-content:center;
+    transform:translateY(6px);
+    transition:transform 1.1s cubic-bezier(.22,.9,.3,1) .35s, box-shadow 1.1s ease .35s;
+  }
+  .env-letter span{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:30px;
+    color:var(--rose-deep);
+    letter-spacing:1px;
+  }
+  .env-pocket{
+    position:absolute; inset:0;
+    z-index:3;
+    pointer-events:none;
+  }
+  .env-pocket::before{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:0; width:0;
+    border-left:150px solid transparent;
+    border-right:150px solid transparent;
+    border-bottom:70px solid var(--card);
+    margin:0 auto;
+  }
+  .env-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:0; width:0;
+    margin:0 auto;
+    border-left:150px solid transparent;
+    border-right:150px solid transparent;
+    border-top:96px solid var(--rose-deep);
+    transform-origin:50% 0%;
+    transform:rotateX(0deg);
+    transition:transform 1s cubic-bezier(.5,-0.2,.4,1.2);
+    z-index:4;
+    filter:drop-shadow(0 2px 3px rgba(58,51,46,0.2));
+  }
+  .env-seal{
+    position:absolute;
+    top:38px; left:50%;
+    transform:translateX(-50%);
+    width:46px; height:46px;
+    border-radius:50%;
+    background:var(--rose-deep);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 8px rgba(0,0,0,0.25);
+    z-index:5;
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .env-seal span{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--ivory);
+    font-size:18px;
+  }
+
+  .envelope.open .env-flap{
+    transform:rotateX(-178deg);
+    z-index:0;
+  }
+  .envelope.open .env-seal{
+    opacity:0;
+    transform:translateX(-50%) scale(0.5);
+  }
+  .envelope.open .env-letter{
+    transform:translateY(-96px);
+    box-shadow:0 20px 30px -14px rgba(58,51,46,0.3);
+  }
+
+  .env-hint{
+    margin-top:38px;
+    font-size:12.5px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--sage);
+    text-align:center;
+    animation:pulseHint 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseHint{
+    0%,100%{ opacity:0.55; }
+    50%{ opacity:1; }
+  }
+  .env-names{
+    margin-top:22px;
+    font-family:'Cormorant Garamond', serif;
+    font-size:30px;
+    color:var(--ink);
+    text-align:center;
+  }
+  .env-names em{
+    font-style:italic;
+    color:var(--gold);
+  }
 </style>
 </head>
-<body>
+<body class="locked">
+<div id="envelopeIntro" tabindex="0" role="button" aria-label="Abrir">
+  <div class="env-scene">
+    <div class="envelope" id="envelope">
+      <div class="env-shadow"></div>
+      <div class="env-back"></div>
+      <div class="env-letter"><span>A &amp; A</span></div>
+      <div class="env-pocket"></div>
+      <div class="env-side"></div>
+      <div class="env-flap"></div>
+      <div class="env-seal"><span>A&A</span></div>
+    </div>
+  </div>
+  <p class="env-names">Amanda <em>&amp;</em> André</p>
+  <p class="env-hint">Toque para abrir</p>
+</div>
 <div class="grain"></div>
+<div id="petals" aria-hidden="true"></div>
 <div class="wrap">
 
   <div class="hero fade-up">
     <div class="monogram"><span>A&A</span></div>
-    <p class="eyebrow">Registro dos convidados</p>
+    <p class="eyebrow">Para você, que está aqui conosco</p>
     <h1>Amanda<span class="amp">&amp;</span>André</h1>
-    <p class="sub">Hoje contamos com o olhar de quem amamos. Toque em um pedido abaixo e envie sua foto.</p>
+    <p class="sub">Ainda bem que você veio. Guarde este instante com a gente — escolha quantos pedidos quiser abaixo e mostre a festa pelos seus olhos.</p>
   </div>
 
   <div class="divider">
@@ -308,8 +549,8 @@
   </div>
 
   <div class="fade-up" style="animation-delay:.1s">
-    <h2 class="prompts-title">Os pedidos da mesa</h2>
-    <p class="prompts-note">Toque em um pedido para tirar ou escolher a foto — o envio acontece sozinho.</p>
+    <h2 class="prompts-title">O que pedimos a você</h2>
+    <p class="prompts-note">Toque em um pedido, tire a foto — o resto é com a gente.</p>
 
     <div class="prompt-list" id="promptList">
       <button type="button" class="prompt" data-label="Quem esta com voce">
@@ -355,13 +596,13 @@
   </div>
 
   <div class="cta-block fade-up" style="animation-delay:.2s">
-    <p class="cta-eyebrow">Tirou uma foto que não está na lista?</p>
+    <p class="cta-eyebrow">Tirou algo que não está na lista?</p>
     <button type="button" class="cta-btn" id="ctaBtn" data-label="Foto livre">
       <svg class="cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 8h-3l-2-3h-6L7 8H4a1 1 0 00-1 1v9a1 1 0 001 1h16a1 1 0 001-1V9a1 1 0 00-1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
       <span class="spin" style="display:none"></span>
-      <span id="ctaLabel">Enviar mesmo assim</span>
+      <span id="ctaLabel">Manda pra gente</span>
     </button>
-    <p class="cta-hint">Deixe-nos ver esta festa pelos seus olhos.</p>
+    <p class="cta-hint">Queremos ver tudo, do seu jeito.</p>
   </div>
 
   <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
@@ -373,13 +614,84 @@
   </div>
 
   <footer class="fade-up" style="animation-delay:.35s">
-    <p class="thanks">Obrigado por fazer parte do nosso dia.</p>
+    <p class="thanks">Com carinho,</p>
     <p class="foot-names">Amanda &amp; André</p>
   </footer>
 
 </div>
 
 <div id="toast"></div>
+
+<script>
+  // ambient falling petals
+  (function(){
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const layer = document.getElementById('petals');
+    const colors = ['#C3897A', '#B79459', '#8C9A7C'];
+    const count = 10;
+    for (let i = 0; i < count; i++){
+      const p = document.createElement('div');
+      p.className = 'petal';
+      const left = Math.random() * 100;
+      const duration = 16 + Math.random() * 12;
+      const delay = -Math.random() * duration;
+      const drift = (Math.random() * 80 - 40) + 'px';
+      const size = 8 + Math.random() * 8;
+      const color = colors[i % colors.length];
+      p.style.left = left + 'vw';
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.background = color;
+      p.style.opacity = (0.25 + Math.random() * 0.3).toFixed(2);
+      p.style.setProperty('--drift', drift);
+      p.style.animationDuration = duration + 's';
+      p.style.animationDelay = delay + 's';
+      layer.appendChild(p);
+    }
+  })();
+
+  // confetti burst
+  function burstConfetti(originX, originY){
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const colors = ['#C3897A', '#B79459', '#8C9A7C', '#A96A5B'];
+    const n = 16;
+    for (let i = 0; i < n; i++){
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 60 + Math.random() * 90;
+      const cx = Math.cos(angle) * dist;
+      const cy = Math.sin(angle) * dist - 30;
+      piece.style.left = originX + 'px';
+      piece.style.top = originY + 'px';
+      piece.style.background = colors[i % colors.length];
+      piece.style.setProperty('--cx', cx + 'px');
+      piece.style.setProperty('--cy', cy + 'px');
+      piece.style.setProperty('--cr', (Math.random()*360) + 'deg');
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 1000);
+    }
+  }
+
+  // scroll reveal for prompt cards
+  (function(){
+    const cards = document.querySelectorAll('.prompt');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      cards.forEach(c => c.classList.add('in-view'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting){
+          const idx = Array.from(cards).indexOf(entry.target);
+          setTimeout(() => entry.target.classList.add('in-view'), (idx % 6) * 90);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -40px 0px' });
+    cards.forEach(c => observer.observe(c));
+  })();
+</script>
 
 <script>
   // ⚠️ Troque pela URL do seu Web App do Google Apps Script (veja instruções enviadas junto com este arquivo).
@@ -410,7 +722,17 @@
   const ctaBtn = document.getElementById('ctaBtn');
   ctaBtn.addEventListener('click', () => openPicker(ctaBtn, ctaBtn.dataset.label));
 
-  function compressImage(file, maxDim = 1600, quality = 0.82){
+  function pickCompressionTarget(){
+    // adapt to a weak venue wifi automatically, when the browser exposes it
+    const conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+    if (conn && conn.effectiveType && /2g/.test(conn.effectiveType)){
+      return { maxDim: 900, quality: 0.6 };
+    }
+    return { maxDim: 1280, quality: 0.72 };
+  }
+
+  function compressImage(file){
+    const { maxDim, quality } = pickCompressionTarget();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onerror = () => reject(new Error('Não foi possível ler a foto.'));
@@ -465,6 +787,10 @@
       });
 
       showToast('Foto enviada! Obrigado 💛');
+      if (trigger){
+        const rect = trigger.getBoundingClientRect();
+        burstConfetti(rect.left + rect.width/2, rect.top + rect.height/2);
+      }
       if (trigger && trigger !== ctaBtn) trigger.classList.add('done');
     } catch (err) {
       if (err && err.message === 'CONFIG'){
@@ -476,12 +802,34 @@
       if (trigger) trigger.classList.remove('uploading');
       if (trigger === ctaBtn){
         ctaBtn.disabled = false;
-        document.getElementById('ctaLabel').textContent = 'Enviar mesmo assim';
+        document.getElementById('ctaLabel').textContent = 'Manda pra gente';
         ctaBtn.querySelector('.spin').style.display = 'none';
         ctaBtn.querySelector('.cta-icon').style.display = 'inline-block';
       }
     }
   });
+</script>
+<script>
+  // envelope intro
+  (function(){
+    const intro = document.getElementById('envelopeIntro');
+    const envelope = document.getElementById('envelope');
+    let opened = false;
+    function openEnvelope(){
+      if (opened) return;
+      opened = true;
+      envelope.classList.add('open');
+      setTimeout(() => {
+        document.body.classList.add('revealed');
+        document.body.classList.remove('locked');
+        intro.classList.add('hidden');
+      }, 1250);
+    }
+    intro.addEventListener('click', openEnvelope);
+    intro.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') openEnvelope();
+    });
+  })();
 </script>
 </body>
 </html>
