@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#FAF5EF">
 <title>Amanda & André — Registro da Festa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
+    color-scheme: light only;
     --ivory:#FAF5EF;
     --ivory-deep:#F2E9DD;
     --ink:#3A332E;
@@ -695,7 +698,7 @@
 
 <script>
   // ⚠️ Troque pela URL do seu Web App do Google Apps Script (veja instruções enviadas junto com este arquivo).
-  const APPS_SCRIPT_URL = atob("aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J5dHVYTFFZN0I5aVlPWHM0R29EMzM5WjZhOTZFMFdyU1N1aWp3bVcwRVpMVWhxQ242Y19SWlRrY2s3dXd5RW5xck8vZXhlYw==");
+  const APPS_SCRIPT_URL = atob("aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J6MzdIbW94TXI3eVpqLThfVXNleFRTTDBDcHNsd2NkZlZldU1GbFY1ZDlVMnNsZDRRbExwXzBkd1NINFVnNUd2dy9leGVj");
 
   const fileInput = document.getElementById('fileInput');
   const toast = document.getElementById('toast');
@@ -779,16 +782,11 @@
       const dataUrl = await compressImage(file);
       const filename = `${label.replace(/\s+/g,'-')}_${Date.now()}.jpg`;
 
-      // Dispara o envio mas não espera o Apps Script terminar de gravar no
-      // Drive: com mode:'no-cors' não dá pra ler a resposta real de qualquer
-      // forma, então esperar só deixava a pessoa olhando pro spinner à toa.
-      fetch(APPS_SCRIPT_URL, {
+      await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ photo: dataUrl, filename })
-      }).catch(err => {
-        console.error('Falha de rede ao enviar foto:', err);
       });
 
       showToast('Foto enviada! Obrigado 💛');
